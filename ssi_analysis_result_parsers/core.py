@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['PACKAGE_NAME', 'DEV_MODE', 'PACKAGE_DIR', 'PROJECT_DIR', 'config', 'set_env_variables', 'get_config',
-           'show_project_env_vars', 'get_samplesheet']
+           'show_project_env_vars', 'get_samplesheet', 'update_results_dict']
 
 # %% ../nbs/00_core.ipynb 4
 # Need the ssi_analysis_result_parsers for a few functions, this can be considered a static var
@@ -52,6 +52,8 @@ from fastcore.script import (
 )  # for @call_parse, https://fastcore.fast.ai/script
 
 # Project specific libraries
+
+from pathlib import Path
 
 # %% ../nbs/00_core.ipynb 13
 import importlib
@@ -187,3 +189,71 @@ def get_samplesheet(sample_sheet_config: dict) -> pd.DataFrame:
     # Clean the df of any extra rows that can be caused by empty lines in the sample sheet
     df = df.dropna(how="all")
     return df
+
+# %% ../nbs/00_core.ipynb 23
+def update_results_dict(
+    old_results: dict,
+    new_results: dict,
+    old_duplicate_key_prefix: str = None,
+    new_duplicate_key_prefix: str = None,
+):
+    duplicate_keys = list(set(old_results.keys()) & set(new_results.keys()))
+    if len(duplicate_keys) == 0:
+        old_results.update(new_results)
+        return old_results
+    else:
+        if old_duplicate_key_prefix is None and new_duplicate_key_prefix is None:
+            raise TypeError(
+                "Dictionaries contain duplicate keys. old_duplicate_key_prefix and/or new_duplicate_key_prefix must be provided"
+            )
+        elif old_duplicate_key_prefix == new_duplicate_key_prefix:
+            raise TypeError(
+                "old_duplicate_key_prefix and new_duplicate_key_prefix cannot be identical"
+            )
+        else:
+            combined_dict = {}
+            if old_duplicate_key_prefix is None:
+                combined_dict.update(old_results)
+            else:
+                for key, value in old_results.items():
+                    if key in duplicate_keys:
+                        combined_dict.update(
+                            {f"{old_duplicate_key_prefix}{key}": value}
+                        )
+                    else:
+                        combined_dict.update({key: value})
+            if new_duplicate_key_prefix is None:
+                combined_dict.update(new_results)
+            else:
+                for key, value in new_results.items():
+                    if key in duplicate_keys:
+                        combined_dict.update(
+                            {f"{new_duplicate_key_prefix}{key}": value}
+                        )
+                    else:
+                        combined_dict.update({key: value})
+        return combined_dict
+
+
+# print(update_results_dict({"a": 1, "b": 2}, {"b":5,"c":7}))
+print(
+    update_results_dict(
+        {"a": 1, "b": 2}, {"b": 5, "c": 7}, new_duplicate_key_prefix="new: "
+    )
+)
+print(
+    update_results_dict(
+        {"a": 1, "b": 2}, {"b": 5, "c": 7}, old_duplicate_key_prefix="old: "
+    )
+)
+print(
+    update_results_dict(
+        {"a": 1, "b": 2},
+        {"b": 5, "c": 7},
+        new_duplicate_key_prefix="new: ",
+        old_duplicate_key_prefix="old: ",
+    )
+)
+
+
+update_results_dict({"a": 1, "d": 2}, {"b": 5, "c": 7})
