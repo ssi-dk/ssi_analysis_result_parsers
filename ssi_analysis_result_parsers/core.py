@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['PACKAGE_NAME', 'DEV_MODE', 'PACKAGE_DIR', 'PROJECT_DIR', 'config', 'set_env_variables', 'get_config',
-           'show_project_env_vars', 'get_samplesheet', 'update_results_dict']
+           'show_project_env_vars', 'get_samplesheet', 'update_results_dict', 'print_results_dict_to_tsv']
 
 # %% ../nbs/00_core.ipynb 4
 # Need the ssi_analysis_result_parsers for a few functions, this can be considered a static var
@@ -54,6 +54,7 @@ from fastcore.script import (
 # Project specific libraries
 
 from pathlib import Path
+from hashlib import sha256
 
 # %% ../nbs/00_core.ipynb 13
 import importlib
@@ -116,7 +117,7 @@ def show_project_env_vars(config: dict) -> None:
         if k.startswith(config["CORE_PROJECT_VARIABLE_PREFIX"]):
             print(f"{k}={v}")
 
-# %% ../nbs/00_core.ipynb 22
+# %% ../nbs/00_core.ipynb 23
 import pandas as pd
 
 
@@ -190,7 +191,7 @@ def get_samplesheet(sample_sheet_config: dict) -> pd.DataFrame:
     df = df.dropna(how="all")
     return df
 
-# %% ../nbs/00_core.ipynb 23
+# %% ../nbs/00_core.ipynb 24
 def update_results_dict(
     old_results: dict,
     new_results: dict,
@@ -203,11 +204,11 @@ def update_results_dict(
         return old_results
     else:
         if old_duplicate_key_prefix is None and new_duplicate_key_prefix is None:
-            raise TypeError(
-                "Dictionaries contain duplicate keys. old_duplicate_key_prefix and/or new_duplicate_key_prefix must be provided"
+            raise ValueError(
+                "Provided dictionaries contain duplicate keys. old_duplicate_key_prefix and/or new_duplicate_key_prefix must be provided"
             )
         elif old_duplicate_key_prefix == new_duplicate_key_prefix:
-            raise TypeError(
+            raise ValueError(
                 "old_duplicate_key_prefix and new_duplicate_key_prefix cannot be identical"
             )
         else:
@@ -235,25 +236,17 @@ def update_results_dict(
         return combined_dict
 
 
-# print(update_results_dict({"a": 1, "b": 2}, {"b":5,"c":7}))
-print(
-    update_results_dict(
-        {"a": 1, "b": 2}, {"b": 5, "c": 7}, new_duplicate_key_prefix="new: "
-    )
-)
-print(
-    update_results_dict(
-        {"a": 1, "b": 2}, {"b": 5, "c": 7}, old_duplicate_key_prefix="old: "
-    )
-)
-print(
-    update_results_dict(
-        {"a": 1, "b": 2},
-        {"b": 5, "c": 7},
-        new_duplicate_key_prefix="new: ",
-        old_duplicate_key_prefix="old: ",
-    )
-)
-
-
-update_results_dict({"a": 1, "d": 2}, {"b": 5, "c": 7})
+def print_results_dict_to_tsv(
+    results_dict: dict, output_file: Path, sample_name: str = None
+) -> None:
+    if sample_name is None:
+        header = "\t".join(str(x) for x in results_dict.keys())
+        values = "\t".join(str(x) for x in results_dict.values())
+    else:
+        header = "sample_name\t" + "\t".join([str(x) for x in results_dict.keys()])
+        values = sample_name + "\t" + "\t".join([str(x) for x in results_dict.values()])
+    o = open(output_file, "w")
+    o.write(header + "\n")
+    o.write(values + "\n")
+    o.close()
+    return None
