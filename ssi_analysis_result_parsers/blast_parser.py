@@ -49,21 +49,26 @@ def extract_presence_absence(
 
     """
     if os.path.exists(blast_output_tsv):
-        blast_df = pandas.read_csv(blast_output_tsv, sep="\t", header=None)
-        blast_df.columns = tsv_header.split(" ")
-        blast_df["plen"] = blast_df["length"] / blast_df["qlen"] * 100
-        blast_df_unique = (
-            blast_df.sort_values(by=["bitscore"], ascending=False)
-            .groupby("qseqid")
-            .first()
-        )
-        blast_df_filtered = blast_df_unique.query(
-            "plen > @plen_threshold and pident > @pident_threshold"
-        )
+        try:
+            blast_df = pandas.read_csv(blast_output_tsv, sep="\t", header=None)
+
+            blast_df.columns = tsv_header.split(" ")
+            blast_df["plen"] = blast_df["length"] / blast_df["qlen"] * 100
+            blast_df_unique = (
+                blast_df.sort_values(by=["bitscore"], ascending=False)
+                .groupby("qseqid")
+                .first()
+            )
+            blast_df_filtered = blast_df_unique.query(
+                "plen > @plen_threshold and pident > @pident_threshold"
+            )
+            blast_dict = dict(blast_df_filtered.to_dict(orient="index"))
+        except pandas.errors.EmptyDataError:
+            blast_dict = {}
         if hits_as_string:
             if include_match_stats:
                 results = []
-                for gene, d in blast_df_filtered.to_dict(orient="index").items():
+                for gene, d in blast_dict.items():
                     results.append(f"{gene}__{d['pident']}__{d['plen']}")
                 result_dict = {"genes_found": ", ".join(results)}
                 return result_dict
@@ -76,7 +81,6 @@ def extract_presence_absence(
 
         else:
             result_dict = {}
-            blast_dict = dict(blast_df_filtered.to_dict(orient="index").items())
             if gene_names is None:
                 gene_names = blast_dict.keys()
             for gene in gene_names:
