@@ -1,0 +1,5 @@
+sample_name	sbt_results	lag1_blast_results
+sample_1	test_input/Legionella/test.sbt.tsv	test_input/Legionella/lag-1_blast.tsv
+sample_2	test_input/Legionella/test2.sbt.tsv	test_input/Legionella/lag-1_blast_2.tsv
+sample_3	test_input/Legionella/test2.sbt.tsv	test_input/empty_file.txt
+sample_4	test_input/empty_file.txt	test_input/Legionella/lag-1_blast_2.tsv

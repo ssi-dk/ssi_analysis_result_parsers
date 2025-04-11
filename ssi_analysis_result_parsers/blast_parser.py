@@ -51,38 +51,46 @@ def extract_presence_absence(
     if os.path.exists(blast_output_tsv):
         try:
             blast_df = pandas.read_csv(blast_output_tsv, sep="\t", header=None)
+            header_list = tsv_header.split(" ")
+            if len(header_list) == len(blast_df.columns):
+                blast_df.columns = tsv_header.split(" ")
+                blast_df["plen"] = blast_df["length"] / blast_df["qlen"] * 100
+                blast_df_unique = (
+                    blast_df.sort_values(by=["bitscore"], ascending=False)
+                    .groupby("qseqid")
+                    .first()
+                )
+                blast_df_filtered = blast_df_unique.query(
+                    "plen > @plen_threshold and pident > @pident_threshold"
+                )
+                blast_dict = dict(blast_df_filtered.to_dict(orient="index"))
+            else:
+                print(
+                    f"Failed to parse {blast_output_tsv}. Number of columns do not match length of provided header string",
+                    file=sys.stderr,
+                )
+                return None
 
-            blast_df.columns = tsv_header.split(" ")
-            blast_df["plen"] = blast_df["length"] / blast_df["qlen"] * 100
-            blast_df_unique = (
-                blast_df.sort_values(by=["bitscore"], ascending=False)
-                .groupby("qseqid")
-                .first()
-            )
-            blast_df_filtered = blast_df_unique.query(
-                "plen > @plen_threshold and pident > @pident_threshold"
-            )
-            blast_dict = dict(blast_df_filtered.to_dict(orient="index"))
         except pandas.errors.EmptyDataError:
             blast_dict = {}
+            print(f"Blast output file {blast_output_tsv} empty. Assuming 0 blast hits.")
+        except Exception as e:
+            print(f"Error parsing blast: e")
         if hits_as_string:
-            if include_match_stats:
-                results = []
-                for gene, d in blast_dict.items():
-                    results.append(f"{gene}__{d['pident']}__{d['plen']}")
-                result_dict = {"genes_found": ", ".join(results)}
-                return result_dict
 
-            else:
-                result_dict = {
-                    "genes_found": ", ".join(list(blast_df_filtered.index.values))
-                }
-                return result_dict
+            results = []
+            for gene, d in blast_dict.items():
+                if include_match_stats:
+                    results.append(f"{gene}__{d['pident']}__{d['plen']}")
+                else:
+                    results.append(gene)
+            result_dict = {"genes_found": ", ".join(results)}
+            return result_dict
 
         else:
             result_dict = {}
             if gene_names is None:
-                gene_names = blast_dict.keys()
+                gene_names = list(blast_dict.keys())
             for gene in gene_names:
                 if gene in blast_dict:
                     if include_match_stats:

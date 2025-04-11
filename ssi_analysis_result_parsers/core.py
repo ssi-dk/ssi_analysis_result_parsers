@@ -2,7 +2,8 @@
 
 # %% auto 0
 __all__ = ['PACKAGE_NAME', 'DEV_MODE', 'PACKAGE_DIR', 'PROJECT_DIR', 'config', 'set_env_variables', 'get_config',
-           'show_project_env_vars', 'get_samplesheet', 'update_results_dict', 'print_results_dict_to_tsv']
+           'show_project_env_vars', 'get_samplesheet', 'PipelineResults', 'update_results_dict',
+           'print_results_dict_to_tsv']
 
 # %% ../nbs/00_core.ipynb 4
 # Need the ssi_analysis_result_parsers for a few functions, this can be considered a static var
@@ -192,48 +193,97 @@ def get_samplesheet(sample_sheet_config: dict) -> pd.DataFrame:
     return df
 
 # %% ../nbs/00_core.ipynb 24
+class PipelineResults:
+
+    def __init__(self, results_dict):
+        print(results_dict)
+        self.results_dict = results_dict
+        self.results_df = pandas.DataFrame.from_dict(results_dict, orient="index")
+
+    def write_tsv(self, output_file: Path) -> None:
+        print_df = self.results_df.reset_index(names="sample_name")
+        print_df.to_csv(output_file, sep="\t", index=False)
+        return None
+
+    @classmethod
+    def from_results_dataframe(cls, results_df: pandas.DataFrame):
+        # results_df = results_df.set_index("sample_name")
+        results_dict = results_df.to_dict(orient="index")
+        return cls(results_dict)
+
+    @classmethod
+    def from_results_tsv(cls, results_tsv: Path):
+        results_df = pandas.read_csv(results_tsv, sep="\t")
+        results_df.set_index("sample_name", inplace=True, drop=True)
+        results_dict = results_df.to_dict(orient="index")
+        return cls(results_dict)
+
+    def __repr__(self):
+        return f"< Generic analysis results object. {len(self.results_df)} samples with {len(self.results_df.columns)} result variables > "
+
+    def __len__(self):
+        return len(self.results_dict)
+
+    def __iter__(self):
+        for sample_name in self.results_dict:
+            yield sample_name
+
+    def items(self):
+        for sample_name, results_d in self.results_dict:
+            yield sample_name, results_d
+
+    def results(self):
+        for results_d in self.results_dict.values():
+            yield results_d
+
+
 def update_results_dict(
     old_results: dict,
     new_results: dict,
     old_duplicate_key_prefix: str = None,
     new_duplicate_key_prefix: str = None,
 ):
-    duplicate_keys = list(set(old_results.keys()) & set(new_results.keys()))
-    if len(duplicate_keys) == 0:
-        old_results.update(new_results)
+    if old_results is None:
+        return new_results
+    elif new_results is None:
         return old_results
     else:
-        if old_duplicate_key_prefix is None and new_duplicate_key_prefix is None:
-            raise ValueError(
-                "Provided dictionaries contain duplicate keys. old_duplicate_key_prefix and/or new_duplicate_key_prefix must be provided"
-            )
-        elif old_duplicate_key_prefix == new_duplicate_key_prefix:
-            raise ValueError(
-                "old_duplicate_key_prefix and new_duplicate_key_prefix cannot be identical"
-            )
+        duplicate_keys = list(set(old_results.keys()) & set(new_results.keys()))
+        if len(duplicate_keys) == 0:
+            old_results.update(new_results)
+            return old_results
         else:
-            combined_dict = {}
-            if old_duplicate_key_prefix is None:
-                combined_dict.update(old_results)
+            if old_duplicate_key_prefix is None and new_duplicate_key_prefix is None:
+                raise ValueError(
+                    "Provided dictionaries contain duplicate keys. Old_duplicate_key_prefix and/or new_duplicate_key_prefix must be provided"
+                )
+            elif old_duplicate_key_prefix == new_duplicate_key_prefix:
+                raise ValueError(
+                    "old_duplicate_key_prefix and new_duplicate_key_prefix cannot be identical"
+                )
             else:
-                for key, value in old_results.items():
-                    if key in duplicate_keys:
-                        combined_dict.update(
-                            {f"{old_duplicate_key_prefix}{key}": value}
-                        )
-                    else:
-                        combined_dict.update({key: value})
-            if new_duplicate_key_prefix is None:
-                combined_dict.update(new_results)
-            else:
-                for key, value in new_results.items():
-                    if key in duplicate_keys:
-                        combined_dict.update(
-                            {f"{new_duplicate_key_prefix}{key}": value}
-                        )
-                    else:
-                        combined_dict.update({key: value})
-        return combined_dict
+                combined_dict = {}
+                if old_duplicate_key_prefix is None:
+                    combined_dict.update(old_results)
+                else:
+                    for key, value in old_results.items():
+                        if key in duplicate_keys:
+                            combined_dict.update(
+                                {f"{old_duplicate_key_prefix}{key}": value}
+                            )
+                        else:
+                            combined_dict.update({key: value})
+                if new_duplicate_key_prefix is None:
+                    combined_dict.update(new_results)
+                else:
+                    for key, value in new_results.items():
+                        if key in duplicate_keys:
+                            combined_dict.update(
+                                {f"{new_duplicate_key_prefix}{key}": value}
+                            )
+                        else:
+                            combined_dict.update({key: value})
+            return combined_dict
 
 
 def print_results_dict_to_tsv(

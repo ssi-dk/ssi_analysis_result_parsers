@@ -3,7 +3,7 @@ project:
 
 website:
   title: "ssi_analysis_result_parsers"
-  site-url: "https://$GIT_USER_NAME.github.io/ssi_analysis_result_parsers"
+  site-url: "https://thej-ssi.github.io/ssi_analysis_result_parsers"
   description: "TODO"
   repo-branch: main
-  repo-url: "https://github.com/$GIT_USER_NAME/ssi_analysis_result_parsers"
+  repo-url: "https://github.com/thej-ssi/ssi_analysis_result_parsers"
