@@ -196,7 +196,6 @@ def get_samplesheet(sample_sheet_config: dict) -> pd.DataFrame:
 class PipelineResults:
 
     def __init__(self, results_dict):
-        print(results_dict)
         self.results_dict = results_dict
         self.results_df = pandas.DataFrame.from_dict(results_dict, orient="index")
 
@@ -207,7 +206,6 @@ class PipelineResults:
 
     @classmethod
     def from_results_dataframe(cls, results_df: pandas.DataFrame):
-        # results_df = results_df.set_index("sample_name")
         results_dict = results_df.to_dict(orient="index")
         return cls(results_dict)
 
