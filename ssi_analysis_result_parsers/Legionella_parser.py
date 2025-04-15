@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['extract_legionella_sbt', 'legionella_summary', 'legionella_batch_from_sheet', 'LegionellaResults',
-           'legionella_batch_from_dict', 'legionella_parser', 'legionella_batch_parser']
+           'legionella_parser', 'legionella_batch_parser']
 
 # %% ../nbs/39_Legionella_parser.ipynb 3
 # standard libs
@@ -166,38 +166,6 @@ class LegionellaResults(core.PipelineResults):
 
     def __repr__(self):
         return f"< Legionella analysis results object. {len(self.results_df)} samples with {len(self.results_df.columns)} result variables > "
-
-
-def legionella_batch_from_dict(file_paths: dict, output_file: Path = None):
-    results_dict = {}
-    for sample_name, path_dict in file_paths.items():
-        legionella_results = legionella_summary(
-            legionella_sbt_results_tsv=Path(path_dict["sbt_results"]),
-            lag1_blast_tsv=Path(path_dict["lag1_blast_results"]),
-        )
-        results_dict[sample_name] = legionella_results
-    if output_file is not None:
-        df = pandas.DataFrame.from_dict(results_dict, orient="index").reset_index(
-            names="sample_name"
-        )
-        df.to_csv(output_file, sep="\t", index=False)
-    return results_dict
-
-
-def legionella_batch_from_sheet(file_paths: dict, output_file: Path = None):
-    results_dict = {}
-    for sample_name, path_dict in file_paths.items():
-        legionella_results = legionella_summary(
-            legionella_sbt_results_tsv=Path(path_dict["sbt_results"]),
-            lag1_blast_tsv=Path(path_dict["lag1_blast_results"]),
-        )
-        results_dict[sample_name] = legionella_results
-    if output_file is not None:
-        df = pandas.DataFrame.from_dict(results_dict, orient="index").reset_index(
-            names="sample_name"
-        )
-        df.to_csv(output_file, sep="\t", index=False)
-    return results_dict
 
 # %% ../nbs/39_Legionella_parser.ipynb 9
 @call_parse
