@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://thej-ssi.github.io/ssi_analysis_result_parsers/index.html</loc>
+    <lastmod>2025-04-15T12:04:54.278Z</lastmod>
+  </url>
+  <url>
+    <loc>https://thej-ssi.github.io/ssi_analysis_result_parsers/legionella_parser.html</loc>
+    <lastmod>2025-04-15T12:04:54.265Z</lastmod>
+  </url>
+  <url>
+    <loc>https://thej-ssi.github.io/ssi_analysis_result_parsers/core.html</loc>
+    <lastmod>2025-04-15T12:04:54.236Z</lastmod>
+  </url>
+  <url>
+    <loc>https://thej-ssi.github.io/ssi_analysis_result_parsers/template.html</loc>
+    <lastmod>2025-04-15T12:04:54.173Z</lastmod>
+  </url>
+  <url>
+    <loc>https://thej-ssi.github.io/ssi_analysis_result_parsers/hello_world.html</loc>
+    <lastmod>2025-04-15T12:04:54.245Z</lastmod>
+  </url>
+  <url>
+    <loc>https://thej-ssi.github.io/ssi_analysis_result_parsers/blast_parser.html</loc>
+    <lastmod>2025-04-15T12:04:54.319Z</lastmod>
+  </url>
+</urlset>
