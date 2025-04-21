@@ -206,11 +206,17 @@ class PipelineResults:
 
     @classmethod
     def from_results_dataframe(cls, results_df: pandas.DataFrame):
+        """
+        Alternative constructor for initializing from DataFrame instead of dictionary
+        """
         results_dict = results_df.to_dict(orient="index")
         return cls(results_dict)
 
     @classmethod
     def from_results_tsv(cls, results_tsv: Path):
+        """
+        Alternative constructor for initializing from a tsv-file instead of dictionary
+        """
         results_df = pandas.read_csv(results_tsv, sep="\t")
         results_df.set_index("sample_name", inplace=True, drop=True)
         results_dict = results_df.to_dict(orient="index")

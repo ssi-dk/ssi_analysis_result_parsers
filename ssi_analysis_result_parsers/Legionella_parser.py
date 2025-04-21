@@ -149,10 +149,8 @@ def legionella_parser(
     lag_1_blast_output: Path = None,  #  Path to output from lag1_blast. Generated with blastn -query lag-1.fasta -subject assembly.fasta -outfmt "6 qseqid sseqid pident length qlen qstart qend sstart send sseq evalue bitscore"
     output_file: Path = None,  # Path to output tsv
     sample_name: str = None,
-    config_file: str = None,  # config file to set env vars from
 ) -> None:
     """ """
-    # config = core.get_config(config_file)  # Set env vars and get config variables
     legionella_results = LegionellaResults.from_tool_paths(
         legionella_sbt_results_tsv=legionella_sbt_file,
         lag1_blast_tsv=lag_1_blast_output,
@@ -165,10 +163,8 @@ def legionella_parser(
 def legionella_batch_parser(
     file_path_tsv: Path = None,  # Path to tsv containing file paths to the outputs from tools to be parsed. Must contain headers "sample_name", "sbt_results", and "lag1_blast_results"
     output_file: Path = None,  # Path to output tsv
-    config_file: str = None,  # config file to set env vars from
 ) -> None:
     """ """
-    # config = core.get_config(config_file)  # Set env vars and get config variables
     legionella_results = LegionellaResults.from_tool_paths_tsv(
         tool_paths_tsv=file_path_tsv
     )
