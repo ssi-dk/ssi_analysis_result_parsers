@@ -7,8 +7,8 @@ __all__ = ['thresholds', 'test_cases', 'setup_logging', 'get_threshold', 'proces
 import os
 import sys
 import pandas as pd
-import logging
 from pathlib import Path
+import logging
 from datetime import datetime
 from typing import List, Dict
 from fastcore.script import call_parse
@@ -16,7 +16,7 @@ from fastcore.script import call_parse
 # import functions from core module (optional, but most likely needed).
 from . import core
 
-# %% ../nbs/49_Ecoli_parser.ipynb 7
+# %% ../nbs/49_Ecoli_parser.ipynb 6
 thresholds = {
     "stx": [98, 98],
     "wzx": [98, 98],
@@ -30,7 +30,7 @@ thresholds = {
     "other": [98, 98],
 }
 
-
+# %% ../nbs/49_Ecoli_parser.ipynb 9
 def setup_logging(log_dir: str, sample_name: str) -> None:
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     os.makedirs(log_dir, exist_ok=True)
@@ -53,8 +53,18 @@ def setup_logging(log_dir: str, sample_name: str) -> None:
 
     logging.info(f"Logging started for {log_file}")
 
-# %% ../nbs/49_Ecoli_parser.ipynb 9
+# %% ../nbs/49_Ecoli_parser.ipynb 11
 def get_threshold(template_name: str, thresholds: Dict[str, List[int]]) -> List[int]:
+    """
+    Returns the coverage and identity threshold for a given gene.
+
+    Args:
+        template_name (str): Name of the template (gene) from the .res file.
+        thresholds (Dict[str, List[int]]): Dictionary of gene thresholds.
+
+    Returns:
+        List[int]: A list of two integers: [coverage_threshold, identity_threshold].
+    """
     for key in thresholds:
         if key in template_name:
             return thresholds[key]
@@ -62,6 +72,16 @@ def get_threshold(template_name: str, thresholds: Dict[str, List[int]]) -> List[
 
 
 def process_res_file(res_file_path: str) -> pd.DataFrame:
+    """
+    Reads and filters a KMA .res file based on predefined thresholds.
+
+    Args:
+        res_file_path (str): Path to the .res file.
+        thresholds (Dict[str, List[int]]): Gene-specific thresholds.
+
+    Returns:
+        pd.DataFrame: Filtered results DataFrame.
+    """
     try:
         res_df = pd.read_csv(res_file_path, sep="\t")
     except FileNotFoundError:
@@ -82,14 +102,22 @@ def process_res_file(res_file_path: str) -> pd.DataFrame:
     ]
     return res_df_filtered
 
-# %% ../nbs/49_Ecoli_parser.ipynb 11
+# %% ../nbs/49_Ecoli_parser.ipynb 13
 class EcoliResults:
     """
     Object for holding and processing E. coli typing results.
+
+    This class stores summary typing data for multiple samples, provides utilities for per-sample processing, and export results in a tab-seperated format (.tsv).
     """
 
     # converts the sample results in dict to pandas df
     def __init__(self, results_dict: dict):
+        """
+        Initializes the EcoliResults object with typing result data.
+
+        Args:
+            results_dict (dict): Dictionary where keys are sample names and values are summary result dictionaries.
+        """
         self.results_dict = results_dict
         self.results_df = pd.DataFrame.from_dict(
             results_dict, orient="index"
@@ -99,6 +127,17 @@ class EcoliResults:
     def summarize_single_sample(
         sample_name: str, res_path: str, verbose_flag: int = 1
     ) -> dict:
+        """
+        Processes a single sample KMA .res file and returns a summary dictionary.
+
+        Args:
+            sample_name (str): Sample identifier.
+            res_path (str): Path to the sample's .res file.
+            verbose_flag (int, optional): Include verbose info if set to 1. Default is 1.
+
+        Returns:
+            Dict[str, str]: Summary values extracted from the .res file.
+        """
         log_dir = "examples/Log"
         setup_logging(log_dir, sample_name)
 
@@ -157,6 +196,7 @@ class EcoliResults:
         if stx_alleles:
             output_data[toxin] = ";".join(sorted(stx_alleles))
 
+        # serotype specific requirements
         wzx, wzy, wzt, wzm = (
             output_data["wzx"],
             output_data["wzy"],
@@ -186,6 +226,7 @@ class EcoliResults:
         Htype = fli if fli != NA_string else fliC
         output_data["OH"] = f"{Otype};{Htype}"
 
+        # adding the additional depth, template coverage and query identity information
         if verbose_flag == 1:
             verbose_parts = []
             for _, row in filtered_df.iterrows():
@@ -207,6 +248,16 @@ class EcoliResults:
     def from_samplesheet(
         cls, samplesheet_path: Path, verbose: int = 1
     ) -> "EcoliResults":
+        """
+        Loads sample data from a samplesheet and summarizes each sample.
+
+        Args:
+            samplesheet_path (Path): Path to the samplesheet TSV file.
+            verbose (int, optional): Whether to include verbose output per sample. Default is 1.
+
+        Returns:
+            EcoliResults: An instance of the class populated with summaries for all samples.
+        """
         df = pd.read_csv(samplesheet_path, sep="\t")
         df.columns = df.columns.str.strip()
 
@@ -228,12 +279,24 @@ class EcoliResults:
         return cls(results_dict)
 
     def write_tsv(self, output_file: Path):
+        """
+        Writes the summarized typing results to a TSV file.
+
+        Args:
+            output_file (Path): Destination file path for the output table.
+        """
         self.results_df.to_csv(output_file, sep="\t", index=False)
 
     def __repr__(self):
+        """
+        Returns a concise summary of the results object.
+
+        Returns:
+            str: A string with sample and variable counts.
+        """
         return f"<EcoliResults: {len(self.results_df)} samples, {len(self.results_df.columns)} variables>"
 
-# %% ../nbs/49_Ecoli_parser.ipynb 13
+# %% ../nbs/49_Ecoli_parser.ipynb 15
 @call_parse
 def ecoli_parser(
     samplesheet_path: Path,  # Input samplesheet
@@ -246,7 +309,7 @@ def ecoli_parser(
     else:
         print(results.results_df)
 
-# %% ../nbs/49_Ecoli_parser.ipynb 15
+# %% ../nbs/49_Ecoli_parser.ipynb 17
 from tempfile import TemporaryDirectory
 from pathlib import Path
 
