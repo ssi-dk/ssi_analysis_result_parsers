@@ -1,5 +1,0 @@
-sample_name	emm_results
-sample_1	test_input/Spyogenes/emm_typing/test1.emm.blast.tsv
-sample_2	test_input/Spyogenes/emm_typing/test2.emm.blast.tsv
-sample_3	test_input/files_that_does_not_exist.tsv
-sample_4	test_input/empty_file.txt
