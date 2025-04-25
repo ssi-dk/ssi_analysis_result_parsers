@@ -71,7 +71,7 @@ class LegionellaResults(core.PipelineResults):
         Alternative constructor for initializing results for single sample,
         Initializes LegionellaResults instance provided paths to outputs from tools (legionella sbt and lag1 presence blast)
         """
-        legionella_results = cls.legionella_summary(
+        legionella_results = cls.summary(
             legionella_sbt_results_tsv=legionella_sbt_results_tsv,
             lag1_blast_tsv=lag1_blast_tsv,
         )
@@ -85,7 +85,7 @@ class LegionellaResults(core.PipelineResults):
         """
         results_dict = {}
         for sample_name, path_dict in file_paths.items():
-            legionella_results = cls.legionella_summary(
+            legionella_results = cls.summary(
                 legionella_sbt_results_tsv=Path(path_dict["sbt_results"]),
                 lag1_blast_tsv=Path(path_dict["lag1_blast_results"]),
             )
@@ -101,7 +101,7 @@ class LegionellaResults(core.PipelineResults):
         file_paths = file_paths_df.to_dict(orient="index")
         results_dict = {}
         for sample_name, path_dict in file_paths.items():
-            legionella_results = cls.legionella_summary(
+            legionella_results = cls.summary(
                 legionella_sbt_results_tsv=Path(path_dict["sbt_results"]),
                 lag1_blast_tsv=Path(path_dict["lag1_blast_results"]),
             )
@@ -120,9 +120,7 @@ class LegionellaResults(core.PipelineResults):
         return cls.from_tool_paths_dataframe(file_paths_df)
 
     @staticmethod
-    def legionella_summary(
-        legionella_sbt_results_tsv: Path, lag1_blast_tsv: Path
-    ) -> dict:
+    def summary(legionella_sbt_results_tsv: Path, lag1_blast_tsv: Path) -> dict:
         sbt_results_dict = extract_legionella_sbt(
             legionella_sbt_results_tsv=legionella_sbt_results_tsv
         )
