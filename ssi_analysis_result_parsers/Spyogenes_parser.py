@@ -85,6 +85,7 @@ def extract_emm_type(emm_blast_tsv: Path):
         .groupby("extended_sstart")
         .first()
     )
+    print(blast_df_unique)
     if blast_df_unique.shape[0] == 1:
         emm_typing_results["EMM_type"] = blast_df_unique.iloc[0]["qseqid"][3:]
         if (
@@ -122,17 +123,16 @@ def extract_emm_type(emm_blast_tsv: Path):
                 notes.append(
                     f"ENN{blast_df_unique.iloc[1]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[1]['pident'],2)} and length {blast_df_unique.iloc[1]['length']}/{blast_df_unique.iloc[1]['qlen']}"
                 )
-
-        emm_maintype = blast_df_unique.iloc[0]["qseqid"][3:].split(".")[0]
-        mrp_maintype = blast_df_unique.iloc[1]["qseqid"][3:].split(".")[0]
-        if (
-            mrp_maintype in emm_types_in_emm_plus_mrp_operons
-            or emm_maintype in mrp_types_in_emm_plus_mrp_operons
-        ):
-            emm_typing_results["MRP_type"] = emm_typing_results["EMM_type"]
-            emm_typing_results["EMM_type"] = emm_typing_results["ENN_type"]
-            emm_typing_results["ENN_type"] = "-"
-            notes.append(f"EMM redesignated due to known MRP+EMM operon")
+            emm_maintype = blast_df_unique.iloc[0]["qseqid"][3:].split(".")[0]
+            mrp_maintype = blast_df_unique.iloc[1]["qseqid"][3:].split(".")[0]
+            if (
+                mrp_maintype in emm_types_in_emm_plus_mrp_operons
+                or emm_maintype in mrp_types_in_emm_plus_mrp_operons
+            ):
+                emm_typing_results["MRP_type"] = emm_typing_results["EMM_type"]
+                emm_typing_results["EMM_type"] = emm_typing_results["ENN_type"]
+                emm_typing_results["ENN_type"] = "-"
+                notes.append(f"EMM redesignated due to known MRP+EMM operon")
 
         elif blast_df_unique.shape[0] == 3:
             emm_typing_results["MRP_type"] = blast_df_unique.iloc[0]["qseqid"][3:]
@@ -176,7 +176,7 @@ class SpyogenesResults(core.PipelineResults):
     def from_tool_paths(cls, emm_blast_tsv: Path, sample_name=None):
         """
         Alternative constructor for initializing results for single sample,
-        Initializes LegionellaResults instance provided paths to outputs from tools (legionella sbt and lag1 presence blast)
+        Initializes SpyogenesResults instance provided paths to outputs from tools (legionella sbt and lag1 presence blast)
         """
         gas_results = cls.summary(emm_blast_tsv=emm_blast_tsv)
         return cls({sample_name: gas_results})
@@ -185,7 +185,7 @@ class SpyogenesResults(core.PipelineResults):
     def from_tool_paths_dict(cls, file_paths: dict):
         """
         Alternative constructor for initializing results for multiple samples,
-        Initializes LegionellaResults instance by providing a dictionary of paths to outputs from tools (legionella sbt and lag1 presence blast)
+        Initializes SpyogenesResults instance by providing a dictionary of paths to outputs from tools (legionella sbt and lag1 presence blast)
         """
         results_dict = {}
         for sample_name, path_dict in file_paths.items():
@@ -197,7 +197,7 @@ class SpyogenesResults(core.PipelineResults):
     def from_tool_paths_dataframe(cls, file_paths_df: pandas.DataFrame):
         """
         Alternative constructor for initializing results for multiple samples,
-        Initializes LegionellaResults instance by providing a DataFrame of paths to outputs from tools (legionella sbt and lag1 presence blast)
+        Initializes SpyogenesResults instance by providing a DataFrame of paths to outputs from tools (legionella sbt and lag1 presence blast)
         """
         file_paths = file_paths_df.to_dict(orient="index")
         results_dict = {}
@@ -210,7 +210,7 @@ class SpyogenesResults(core.PipelineResults):
     def from_tool_paths_tsv(cls, tool_paths_tsv: Path):
         """
         Alternative constructor for initializing results for multiple samples,
-        Initializes LegionellaResults instance by providing a tsv-file with paths to outputs from tools (legionella sbt and lag1 presence blast)
+        Initializes SpyogenesResults instance by providing a tsv-file with paths to outputs from tools (legionella sbt and lag1 presence blast)
         """
         file_paths_df = pandas.read_csv(tool_paths_tsv, sep="\t")
         file_paths_df.set_index("sample_name", inplace=True, drop=True)
@@ -226,7 +226,7 @@ class SpyogenesResults(core.PipelineResults):
         return results_dict
 
     def __repr__(self):
-        return f"< Legionella analysis results object. {len(self.results_df)} samples with {len(self.results_df.columns)} result variables > "
+        return f"< Spyogenes analysis results object. {len(self.results_df)} samples with {len(self.results_df.columns)} result variables > "
 
 # %% ../nbs/31_Spyogenes_parser.ipynb 9
 @call_parse
