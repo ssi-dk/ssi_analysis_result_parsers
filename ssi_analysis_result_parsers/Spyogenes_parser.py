@@ -193,7 +193,6 @@ def extract_emm_type(emm_blast_tsv: Path):
                         f"ENN{blast_df_unique.iloc[2]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[2]['pident'],2)} and length {blast_df_unique.iloc[2]['length']}/{blast_df_unique.iloc[2]['qlen']}"
                     )
     else:
-        note_to_add = "EMM and EMM-like genes found on multiple contigs"
         emm_genes = []
         for index, row in blast_df_unique.iterrows():
             if row["length"] < row["qlen"] or row["pident"] < 100:
