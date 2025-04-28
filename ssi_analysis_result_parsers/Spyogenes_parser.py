@@ -56,7 +56,14 @@ def extract_emm_type(emm_blast_tsv: Path):
     """
 
     emm_types_in_emm_plus_mrp_operons = []  ### to update
-    mrp_types_in_emm_plus_mrp_operons = ["156"]  ### to update
+    mrp_types_in_emm_plus_mrp_operons = [
+        "134",
+        "156",
+        "159",
+        "164",
+        "174",
+        "205",
+    ]  ### to update
     emm_blast_tsv = Path(emm_blast_tsv)
     emm_typing_results = {"EMM_type": "-", "ENN_type": "-", "MRP_type": "-"}
     if not emm_blast_tsv.exists():
@@ -85,87 +92,119 @@ def extract_emm_type(emm_blast_tsv: Path):
         .groupby("extended_sstart")
         .first()
     )
-    print(blast_df_unique)
-    if blast_df_unique.shape[0] == 1:
-        emm_typing_results["EMM_type"] = blast_df_unique.iloc[0]["qseqid"][3:]
-        if (
-            blast_df_unique.iloc[0]["length"] < 180
-            or blast_df_unique.iloc[0]["pident"] < 100
-        ):
-            emm_typing_results["EMM_type"] += "*"
-            notes.append(
-                f"EMM{blast_df_unique.iloc[0]['qseqid'][3:]} with {round(blast_df_unique.iloc[0]['pident'],2)} and length {blast_df_unique.iloc[0]['length']}/{blast_df_unique.iloc[0]['qlen']}"
+
+    if blast_df_unique.shape[0] == 0:
+        notes.append("No blast hits found for EMM genes")
+    elif len(set(blast_df_unique["sseqid"])) == 1:
+        if blast_df_unique.shape[0] == 1:
+            emm_typing_results["EMM_type"] = (
+                "EMM" + blast_df_unique.iloc[0]["qseqid"][3:]
             )
-    else:
-        if blast_df_unique.iloc[0]["sstart"] < blast_df_unique.iloc[0]["send"]:
-            blast_df_unique = blast_df_unique.sort_values(by=["sstart"], ascending=True)
+            if (
+                blast_df_unique.iloc[0]["length"] < blast_df_unique.iloc[0]["qlen"]
+                or blast_df_unique.iloc[0]["pident"] < 100
+            ):
+                emm_typing_results["EMM_type"] += "*"
+                notes.append(
+                    f"EMM{blast_df_unique.iloc[0]['qseqid'][3:]} with {round(blast_df_unique.iloc[0]['pident'],2)} and length {blast_df_unique.iloc[0]['length']}/{blast_df_unique.iloc[0]['qlen']}"
+                )
         else:
-            blast_df_unique = blast_df_unique.sort_values(
-                by=["sstart"], ascending=False
-            )
-        if blast_df_unique.shape[0] == 2:
-            emm_typing_results["EMM_type"] = blast_df_unique.iloc[0]["qseqid"][3:]
-            if (
-                blast_df_unique.iloc[0]["length"] < 180
-                or blast_df_unique.iloc[0]["pident"] < 100
-            ):
-                emm_typing_results["EMM_type"] += "*"
-                notes.append(
-                    f"EMM{blast_df_unique.iloc[0]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[0]['pident'],2)} and length {blast_df_unique.iloc[0]['length']}/{blast_df_unique.iloc[0]['qlen']}"
+            if blast_df_unique.iloc[0]["sstart"] < blast_df_unique.iloc[0]["send"]:
+                blast_df_unique = blast_df_unique.sort_values(
+                    by=["sstart"], ascending=True
                 )
+            else:
+                blast_df_unique = blast_df_unique.sort_values(
+                    by=["sstart"], ascending=False
+                )
+            if blast_df_unique.shape[0] == 2:
+                emm_typing_results["EMM_type"] = (
+                    "EMM" + blast_df_unique.iloc[0]["qseqid"][3:]
+                )
+                if (
+                    blast_df_unique.iloc[0]["length"] < blast_df_unique.iloc[0]["qlen"]
+                    or blast_df_unique.iloc[0]["pident"] < 100
+                ):
+                    emm_typing_results["EMM_type"] += "*"
+                    notes.append(
+                        f"EMM{blast_df_unique.iloc[0]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[0]['pident'],2)} and length {blast_df_unique.iloc[0]['length']}/{blast_df_unique.iloc[0]['qlen']}"
+                    )
 
-            emm_typing_results["ENN_type"] = blast_df_unique.iloc[1]["qseqid"][3:]
-            if (
-                blast_df_unique.iloc[1]["length"] < 180
-                or blast_df_unique.iloc[1]["pident"] < 100
-            ):
-                emm_typing_results["ENN_type"] += "*"
-                notes.append(
-                    f"ENN{blast_df_unique.iloc[1]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[1]['pident'],2)} and length {blast_df_unique.iloc[1]['length']}/{blast_df_unique.iloc[1]['qlen']}"
+                emm_typing_results["ENN_type"] = (
+                    "ENN" + blast_df_unique.iloc[1]["qseqid"][3:]
                 )
-            emm_maintype = blast_df_unique.iloc[0]["qseqid"][3:].split(".")[0]
-            mrp_maintype = blast_df_unique.iloc[1]["qseqid"][3:].split(".")[0]
-            if (
-                mrp_maintype in emm_types_in_emm_plus_mrp_operons
-                or emm_maintype in mrp_types_in_emm_plus_mrp_operons
-            ):
-                emm_typing_results["MRP_type"] = emm_typing_results["EMM_type"]
-                emm_typing_results["EMM_type"] = emm_typing_results["ENN_type"]
-                emm_typing_results["ENN_type"] = "-"
-                notes.append(f"EMM redesignated due to known MRP+EMM operon")
+                if (
+                    blast_df_unique.iloc[1]["length"] < blast_df_unique.iloc[1]["qlen"]
+                    or blast_df_unique.iloc[1]["pident"] < 100
+                ):
+                    emm_typing_results["ENN_type"] += "*"
+                    notes.append(
+                        f"ENN{blast_df_unique.iloc[1]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[1]['pident'],2)} and length {blast_df_unique.iloc[1]['length']}/{blast_df_unique.iloc[1]['qlen']}"
+                    )
+                emm_maintype = blast_df_unique.iloc[0]["qseqid"][3:].split(".")[0]
+                mrp_maintype = blast_df_unique.iloc[1]["qseqid"][3:].split(".")[0]
+                if (
+                    mrp_maintype in emm_types_in_emm_plus_mrp_operons
+                    or emm_maintype in mrp_types_in_emm_plus_mrp_operons
+                ):
+                    emm_typing_results["MRP_type"] = (
+                        "MRP" + emm_typing_results["EMM_type"][3:]
+                    )
+                    emm_typing_results["EMM_type"] = (
+                        "EMM" + emm_typing_results["ENN_type"][3:]
+                    )
+                    emm_typing_results["ENN_type"] = "-"
+                    notes.append(f"EMM redesignated due to known MRP+EMM operon")
 
-        elif blast_df_unique.shape[0] == 3:
-            emm_typing_results["MRP_type"] = blast_df_unique.iloc[0]["qseqid"][3:]
-            if (
-                blast_df_unique.iloc[0]["length"] < 180
-                or blast_df_unique.iloc[0]["pident"] < 100
-            ):
-                emm_typing_results["MRP_type"] += "*"
-                notes.append(
-                    f"MRP{blast_df_unique.iloc[0]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[0]['pident'],2)} and length {blast_df_unique.iloc[0]['length']}/{blast_df_unique.iloc[0]['qlen']}"
+            elif blast_df_unique.shape[0] == 3:
+                emm_typing_results["MRP_type"] = (
+                    "MRP" + blast_df_unique.iloc[0]["qseqid"][3:]
                 )
+                if (
+                    blast_df_unique.iloc[0]["length"] < blast_df_unique.iloc[0]["qlen"]
+                    or blast_df_unique.iloc[0]["pident"] < 100
+                ):
+                    emm_typing_results["MRP_type"] += "*"
+                    notes.append(
+                        f"MRP{blast_df_unique.iloc[0]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[0]['pident'],2)} and length {blast_df_unique.iloc[0]['length']}/{blast_df_unique.iloc[0]['qlen']}"
+                    )
 
-            emm_typing_results["EMM_type"] = blast_df_unique.iloc[1]["qseqid"][3:]
-            if (
-                blast_df_unique.iloc[1]["length"] < 180
-                or blast_df_unique.iloc[1]["pident"] < 100
-            ):
-                emm_typing_results["EMM_type"] += "*"
-                notes.append(
-                    f"EMM{blast_df_unique.iloc[1]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[1]['pident'],2)} and length {blast_df_unique.iloc[1]['length']}/{blast_df_unique.iloc[1]['qlen']}"
+                emm_typing_results["EMM_type"] = (
+                    "EMM" + blast_df_unique.iloc[1]["qseqid"][3:]
                 )
+                if (
+                    blast_df_unique.iloc[1]["length"] < blast_df_unique.iloc[1]["qlen"]
+                    or blast_df_unique.iloc[1]["pident"] < 100
+                ):
+                    emm_typing_results["EMM_type"] += "*"
+                    notes.append(
+                        f"EMM{blast_df_unique.iloc[1]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[1]['pident'],2)} and length {blast_df_unique.iloc[1]['length']}/{blast_df_unique.iloc[1]['qlen']}"
+                    )
 
-            emm_typing_results["ENN_type"] = blast_df_unique.iloc[2]["qseqid"][3:]
-            if (
-                blast_df_unique.iloc[2]["length"] < 180
-                or blast_df_unique.iloc[2]["pident"] < 100
-            ):
-                emm_typing_results["ENN_type"] += "*"
-                notes.append(
-                    f"ENN{blast_df_unique.iloc[2]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[2]['pident'],2)} and length {blast_df_unique.iloc[2]['length']}/{blast_df_unique.iloc[2]['qlen']}"
+                emm_typing_results["ENN_type"] = (
+                    "ENN" + blast_df_unique.iloc[2]["qseqid"][3:]
                 )
-        elif blast_df_unique.shape[0] == 0:
-            notes.append("No blast hits found for EMM genes")
+                if (
+                    blast_df_unique.iloc[2]["length"] < blast_df_unique.iloc[2]["qlen"]
+                    or blast_df_unique.iloc[2]["pident"] < 100
+                ):
+                    emm_typing_results["ENN_type"] += "*"
+                    notes.append(
+                        f"ENN{blast_df_unique.iloc[2]['qseqid'][3:]} with pident {round(blast_df_unique.iloc[2]['pident'],2)} and length {blast_df_unique.iloc[2]['length']}/{blast_df_unique.iloc[2]['qlen']}"
+                    )
+    else:
+        note_to_add = "EMM and EMM-like genes found on multiple contigs"
+        emm_genes = []
+        for index, row in blast_df_unique.iterrows():
+            if row["length"] < row["qlen"] or row["pident"] < 100:
+                emm_genes.append(row["qseqid"][3:] + "*")
+            else:
+                emm_genes.append(row["qseqid"][3:])
+        notes.append(
+            "EMM and EMM-like genes found on multiple contigs. Alleles found: "
+            + "/".join(emm_genes)
+        )
+
     emm_typing_results["emm_typing_notes"] = ", ".join(notes)
     return emm_typing_results
 

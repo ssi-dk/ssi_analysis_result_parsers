@@ -122,19 +122,27 @@ def extract_allele_matches(
     allele_dict = {}
     detailed_dict = {}
     if os.path.exists(blast_output_tsv):
-        blast_df = pandas.read_csv(blast_output_tsv, sep="\t", header=None)
-        blast_df.columns = tsv_header.split(" ")
-        blast_df.set_index("qseqid", drop=False)
-        blast_df["plen"] = blast_df["length"] / blast_df["qlen"] * 100
-        blast_df[["gene", "allele"]] = blast_df["qseqid"].str.split("_", expand=True)
-        blast_df_unique = (
-            blast_df.sort_values(by=["bitscore"], ascending=False)
-            .groupby("gene")
-            .first()
-        )
-        for gene, d in blast_df_unique.to_dict(orient="index").items():
-            allele_dict[gene] = d["allele"]
-            detailed_dict[gene] = f"{d['allele']}__{d['pident']}__{d['plen']}"
+        try:
+            blast_df = pandas.read_csv(blast_output_tsv, sep="\t", header=None)
+            blast_df.columns = tsv_header.split(" ")
+            blast_df.set_index("qseqid", drop=False)
+            blast_df["plen"] = blast_df["length"] / blast_df["qlen"] * 100
+            blast_df[["gene", "allele"]] = blast_df["qseqid"].str.split(
+                "_", expand=True
+            )
+            blast_df_unique = (
+                blast_df.sort_values(by=["bitscore"], ascending=False)
+                .groupby("gene")
+                .first()
+            )
+            for gene, d in blast_df_unique.to_dict(orient="index").items():
+                allele_dict[gene] = d["allele"]
+                detailed_dict[gene] = f"{d['allele']}__{d['pident']}__{d['plen']}"
+
+        except pandas.errors.EmptyDataError:
+            detailed_dict = {}
+            allele_dict = {}
+            print(f"Blast output file {blast_output_tsv} empty. Assuming 0 blast hits.")
     else:
         print(f"No blast output found at {blast_output_tsv}", file=sys.stderr)
 
