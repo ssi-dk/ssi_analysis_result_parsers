@@ -1,0 +1,6 @@
+sample_name	meningotype_results	MLST	mlst_scheme_tsv
+sample_1	test_input/Nmeningitidis/meningotype/meningotype1.tsv	1466	test_input/Nmeningitidis/neisseria_mlst_scheme.tsv
+sample_2	test_input/Nmeningitidis/meningotype/meningotype2.tsv	1157	test_input/Nmeningitidis/neisseria_mlst_scheme.tsv
+sample_3	test_input/Nmeningitidis/meningotype/meningotype3.tsv	-	test_input/Nmeningitidis/neisseria_mlst_scheme.tsv
+sample_4	test_input/Nmeningitidis/meningotype/meningotype4.tsv	fdafd	test_input/Nmeningitidis/neisseria_mlst_scheme.tsv
+sample_5	test_input/empty_file.txt	fdafd	test_input/Nmeningitidis/neisseria_mlst_scheme.tsv
