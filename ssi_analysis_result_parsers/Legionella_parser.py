@@ -32,6 +32,7 @@ from ssi_analysis_result_parsers import (
 # Project specific libraries
 from pathlib import Path
 import pandas
+import numpy
 import sys
 
 # %% ../nbs/39_Legionella_parser.ipynb 6
@@ -49,7 +50,7 @@ def extract_legionella_sbt(legionella_sbt_results_tsv: Path) -> dict:
             return d[fname]
         except pandas.errors.EmptyDataError:
             print(
-                f"No Legionella SBT output empty at {legionella_sbt_results_tsv}",
+                f"Legionella SBT output empty at {legionella_sbt_results_tsv}",
                 file=sys.stderr,
             )
             return None
@@ -98,6 +99,7 @@ class LegionellaResults(core.PipelineResults):
         Alternative constructor for initializing results for multiple samples,
         Initializes LegionellaResults instance by providing a DataFrame of paths to outputs from tools (legionella sbt and lag1 presence blast)
         """
+        file_paths_df.replace(numpy.nan, None, inplace=True)
         file_paths = file_paths_df.to_dict(orient="index")
         results_dict = {}
         for sample_name, path_dict in file_paths.items():
