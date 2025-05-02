@@ -1,0 +1,5 @@
+#ariba_ref_name	ref_name	gene	var_only	flag	reads	cluster	ref_len	ref_base_assembled	pc_ident	ctg	ctg_len	ctg_cov	known_var	var_type	var_seq_type	known_var_change	has_known_var	ref_ctg_change	ref_ctg_effect	ref_start	ref_end	ref_nt	ctg_start	ctg_end	ctg_nt	smtls_total_depth	smtls_nts	smtls_nts_depth	var_description	free_text
+ftsI	ftsI	1	0	539	1394	cluster	1833	1833	99.51	cluster.l15.c4.ctg.1	2675	74.5	0	.	p	.	0	A22T	NONSYN	64	66	GCA	560	562	ACA	69;69;72	A;C;A,C	58;57;59,1	.	.
+ftsI	ftsI	1	0	539	1394	cluster	1833	1833	99.51	cluster.l15.c4.ctg.1	2675	74.5	0	.	p	.	0	A239E	NONSYN	715	717	GCA	1211	1213	GAA	124;124;129	G;A;A	99;99;103	.	.
+ftsI	ftsI	1	0	539	1394	cluster	1833	1833	99.51	cluster.l15.c4.ctg.1	2675	74.5	0	.	p	.	0	I475L	NONSYN	1423	1425	ATT	1919	1921	CTT	100;98;98	C;T;T	88;86;85	.	.
+ftsI	ftsI	1	0	539	1394	cluster	1833	1833	99.51	cluster.l15.c4.ctg.1	2675	74.5	0	.	p	.	0	E603D	NONSYN	1807	1809	GAA	2303	2305	GAT	84;84;84	G;A;T	68;68;68	.	.
