@@ -41,13 +41,25 @@ def extract_meningotype(meningotype_tsv: Path):
     if meningotype_tsv.exists():
         try:
             df = pandas.read_csv(meningotype_tsv, sep="\t")
-            PorA_split = df["PorA"][0].split(",")
-            return {
-                "SEROGROUP": df["SEROGROUP"][0],
-                "VR1": PorA_split[0],
-                "VR2": PorA_split[1],
-                "FetA": df["FetA"][0],
-            }
+            if df.shape[0] > 0:
+                PorA_split = df.iloc[0]["PorA"].split(",")
+                VR1 = PorA_split[0]
+                try:
+                    VR2 = PorA_split[1]
+                except:
+                    VR2 = ""
+                return {
+                    "SEROGROUP": df.iloc[0]["SEROGROUP"],
+                    "VR1": VR1,
+                    "VR2": VR2,
+                    "FetA": df.iloc[0]["FetA"],
+                }
+            else:
+                print(
+                    f"Meningotype output file empty at {meningotype_tsv}",
+                    file=sys.stderr,
+                )
+                return None
         except pandas.errors.EmptyDataError:
             print(
                 f"Meningotype output file empty at {meningotype_tsv}", file=sys.stderr
