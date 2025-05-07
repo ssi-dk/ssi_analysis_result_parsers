@@ -1,0 +1,12 @@
+pos	311	337	350	352	357	368	377	385	389	437	443	449	490	501	502	511	517	526	528	530	532	547	562	569	586
+Ref	S	A	D	S	S	A	M	S	L	A	T	I	G	R	A	V	R	N	Y	A	T	V	V	N	A
+I	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	H	 	 	 	 	 	 	 	 
+IIa	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	K	 	 	 	 	 	 	 
+IIb	 	 	 	 	 	 	 	 	 	 	 	 	 	 	V	 	 	K	 	 	 	 	 	 	 
+IIc	 	 	 	 	 	 	 	 	 	 	 	 	 	 	T	 	 	K	 	 	 	 	 	 	 
+IId	 	 	 	 	 	 	 	 	 	 	 	V	 	 	 	 	 	K	 	 	 	 	 	 	 
+III	 	 	 	 	 	 	 	T	 	 	 	 	 	 	 	 	 	K	 	 	 	 	 	 	 
+III+	 	 	 	 	 	 	 	T	F	 	 	 	 	 	 	 	 	K	 	 	 	 	 	 	 
+III like	 	 	 	 	 	 	 	T	 	 	 	 	 	 	 	 	H	 	 	 	 	 	 	 	 
+III like +	 	 	 	 	 	 	 	T	F	 	 	 	 	 	 	 	H	 	 	 	 	 	 	 	 
+Diverse	P	V/N	N	T/N/F	N	T	I	T	F	S	A	V	E	E/L/H	T/V	A	H	K	H	S	S	I	L	S	S

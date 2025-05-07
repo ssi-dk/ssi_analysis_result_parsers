@@ -1,0 +1,2 @@
+#isolate	predicted_serotype	attributes	genes_identified	locus_location	region_I_genes	region_II_genes	region_III_genes	IS1016_hits
+HINF-2024-0115	type_e	full_gene_complement,fragmented_locus	bexA,bexB,bexC,bexD,ecs1,ecs2,ecs3;ecs4,ecs5,ecs6,ecs7,ecs8,hcsA,hcsB	HINF-2024-0115_61_149.787:10271-19835;HINF-2024-0115_2_192.991:20-8457	4/4	8/8	2/2	1
