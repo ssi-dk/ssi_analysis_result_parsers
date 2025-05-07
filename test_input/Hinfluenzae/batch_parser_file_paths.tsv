@@ -1,0 +1,5 @@
+sample_name	biotype_results	ftsI_ariba_results	hicap_results	ftsI_types_tsv
+sample_1	test_input/Hinfluenzae/biotype/sample1.biotype.blast.tsv	test_input/Hinfluenzae/ariba_ftsI/sample1.ftsI.ariba.tsv	test_input/Hinfluenzae/hicap/sample1.hicap.tsv	test_input/Hinfluenzae/ariba_ftsI/ftsI_types_table.txt
+sample_2	test_input/empty_file.txt	test_input/empty_file.txt	test_input/empty_file.txt	test_input/empty_file.txt
+sample_3	test_input/nonexist_file.txt	test_input/nonexist_file.txt	test_input/nonexist_file.txt	test_input/nonexist_file.txt
+

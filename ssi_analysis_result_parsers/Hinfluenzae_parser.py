@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['get_biotype_from_gene_presence', 'extract_hicap_results', 'extract_ariba_ftsI_snps', 'HinfluenzaeResults',
-           'legionella_parser', 'legionella_batch_parser']
+           'Hinfluenzae_parser', 'Hinfluenzae_batch_parser']
 
 # %% ../nbs/38_Hinfluenzae_parser.ipynb 3
 # standard libs
@@ -41,30 +41,35 @@ def get_biotype_from_gene_presence(biotype_gene_presence_dict: Path) -> dict:
     """
     Convert biotype gene presence dict to biotype
     """
-
-    if biotype_gene_presence_dict["indole"] == "1":
-        if biotype_gene_presence_dict["urease"] == "1":
-            if biotype_gene_presence_dict["ODC"] == "1":
-                biotype = "I"
+    if biotype_gene_presence_dict:
+        if not biotype_gene_presence_dict["indole"] == "0":
+            if not biotype_gene_presence_dict["urease"] == "0":
+                if not biotype_gene_presence_dict["ODC"] == "0":
+                    biotype = "I"
+                else:
+                    biotype = "II"
             else:
-                biotype = "II"
+                if not biotype_gene_presence_dict["ODC"] == "0":
+                    biotype = "V"
+                else:
+                    biotype = "VII"
         else:
-            if biotype_gene_presence_dict["ODC"] == "1":
-                biotype = "V"
+            if not biotype_gene_presence_dict["urease"] == "0":
+                if not biotype_gene_presence_dict["ODC"] == "0":
+                    biotype = "IV"
+                else:
+                    biotype = "III"
             else:
-                biotype = "VII"
+                if not biotype_gene_presence_dict["ODC"] == "0":
+                    biotype = "VI"
+                else:
+                    biotype = "VIII"
+        return {"biotype": biotype}
     else:
-        if biotype_gene_presence_dict["urease"] == "1":
-            if biotype_gene_presence_dict["ODC"] == "1":
-                biotype = "IV"
-            else:
-                biotype = "III"
-        else:
-            if biotype_gene_presence_dict["ODC"] == "1":
-                biotype = "VI"
-            else:
-                biotype = "VIII"
-    return {"biotype": biotype}
+        print(
+            f"Nonetype input provided for biotype gene presence. Cannot determine biotype."
+        )
+        return None
 
 
 def extract_hicap_results(hicap_tsv: Path):
@@ -103,7 +108,6 @@ def extract_ariba_ftsI_snps(ariba_output_tsv: Path, ftsI_types_tsv: Path):
         with open(ftsI_types_tsv) as f:
             for line in f:
                 line = line.rstrip("\n").split("\t")
-                print(line)
                 if line[0] == "pos":
                     positions = line[1:]
                 elif line[0] == "Ref":
@@ -155,8 +159,8 @@ def extract_ariba_ftsI_snps(ariba_output_tsv: Path, ftsI_types_tsv: Path):
         return None
     return {
         "ftsI_type": best_type,
-        "key_ftsI_snps": change_list,
-        "all_ftsI_snps": ftsI_gene_snps,
+        "key_ftsI_snps": ",".join(change_list),
+        "all_ftsI_snps": ",".join(ftsI_gene_snps),
     }
 
 
@@ -164,15 +168,22 @@ class HinfluenzaeResults(core.PipelineResults):
 
     @classmethod
     def from_tool_paths(
-        cls, legionella_sbt_results_tsv: Path, lag1_blast_tsv: Path, sample_name=None
+        cls,
+        ftsI_ariba_tsv: Path,
+        hicap_tsv: Path,
+        biotype_blast_tsv: Path,
+        ftsI_types_tsv: Path,
+        sample_name=None,
     ):
         """
         Alternative constructor for initializing results for single sample,
         Initializes HinfluenzaeResults instance provided paths to outputs from tools (legionella sbt and lag1 presence blast)
         """
         hinfluenze_results = cls.summary(
-            legionella_sbt_results_tsv=legionella_sbt_results_tsv,
-            lag1_blast_tsv=lag1_blast_tsv,
+            ftsI_ariba_tsv=ftsI_ariba_tsv,
+            hicap_tsv=hicap_tsv,
+            biotype_blast_tsv=biotype_blast_tsv,
+            ftsI_types_tsv=ftsI_types_tsv,
         )
         return cls({sample_name: hinfluenze_results})
 
@@ -185,8 +196,10 @@ class HinfluenzaeResults(core.PipelineResults):
         results_dict = {}
         for sample_name, path_dict in file_paths.items():
             hinfluenze_results = cls.summary(
-                legionella_sbt_results_tsv=Path(path_dict["sbt_results"]),
-                lag1_blast_tsv=Path(path_dict["lag1_blast_results"]),
+                ftsI_ariba_tsv=Path(path_dict["ftsI_ariba_results"]),
+                hicap_tsv=Path(path_dict["hicap_results"]),
+                biotype_blast_tsv=Path(path_dict["biotype_results"]),
+                ftsI_types_tsv=Path(path_dict["ftsI_types_tsv"]),
             )
             results_dict[sample_name] = hinfluenze_results
         return cls(results_dict)
@@ -201,12 +214,13 @@ class HinfluenzaeResults(core.PipelineResults):
         file_paths = file_paths_df.to_dict(orient="index")
         results_dict = {}
         for sample_name, path_dict in file_paths.items():
-            hinfluenze_results = cls.summary(
-                legionella_sbt_results_tsv=Path(path_dict["sbt_results"]),
-                lag1_blast_tsv=Path(path_dict["lag1_blast_results"]),
+            hinfluenzae_results = cls.summary(
+                ftsI_ariba_tsv=Path(path_dict["ftsI_ariba_results"]),
+                hicap_tsv=Path(path_dict["hicap_results"]),
+                biotype_blast_tsv=Path(path_dict["biotype_results"]),
+                ftsI_types_tsv=Path(path_dict["ftsI_types_tsv"]),
             )
-            print(hinfluenze_results)
-            results_dict[sample_name] = hinfluenze_results
+            results_dict[sample_name] = hinfluenzae_results
         return cls(results_dict)
 
     @classmethod
@@ -222,46 +236,62 @@ class HinfluenzaeResults(core.PipelineResults):
     @staticmethod
     def summary(
         ftsI_ariba_tsv: Path,
+        hicap_tsv: Path,
         biotype_blast_tsv: Path,
+        ftsI_types_tsv: Path,
     ) -> dict:
+        ftsI_results = extract_ariba_ftsI_snps(
+            ariba_output_tsv=ftsI_ariba_tsv, ftsI_types_tsv=ftsI_types_tsv
+        )
+        hicap_results = extract_hicap_results(hicap_tsv=hicap_tsv)
         biotype_gene_dict = blast_parser.extract_presence_absence(
             blast_output_tsv=biotype_blast_tsv,
             hits_as_string=False,
-            include_match_stats=False,
+            include_match_stats=True,
             gene_names=["indole", "urease", "ODC"],
         )
-        biotype_dict = get_biotype_from_gene_presence(
+        biotype_results = get_biotype_from_gene_presence(
             biotype_gene_presence_dict=biotype_gene_dict
         )
         results_dict = core.update_results_dict(
-            biotype_gene_dict, biotype_dict, old_duplicate_key_prefix="_"
+            ftsI_results, hicap_results, new_duplicate_key_prefix="hicap:"
+        )
+        results_dict = core.update_results_dict(
+            results_dict, biotype_results, old_duplicate_key_prefix="_"
+        )
+        results_dict = core.update_results_dict(
+            results_dict, biotype_gene_dict, old_duplicate_key_prefix="biotype:"
         )
         if results_dict is None:
             return {}
         return results_dict
 
     def __repr__(self):
-        return f"< Hinfluenzae analysis results object. {len(self.results_df)} samples with {len(self.results_df.columns)} result variables > "
+        return f"< Hinfluenzae analysis results object. {len(self.results_df)} samples with {len(self.results_df.columns)} result variables >"
 
 # %% ../nbs/38_Hinfluenzae_parser.ipynb 9
 @call_parse
-def legionella_parser(
-    legionella_sbt_file: Path = None,  # Path "*.sbt.tsv from legionella_sbt program"
-    lag_1_blast_output: Path = None,  #  Path to output from lag1_blast. Generated with blastn -query lag-1.fasta -subject assembly.fasta -outfmt "6 qseqid sseqid pident length qlen qstart qend sstart send sseq evalue bitscore"
+def Hinfluenzae_parser(
+    ftsI_ariba_tsv: Path = None,  # Path to report.tsv from ftsI ariba output
+    hicap_tsv: Path = None,  #  Path to hicap tsv output
+    biotype_blast_tsv: Path = None,  #  Path to output from biotype gene blast. Generated with blastn -query biotype_genes.fasta -subject assembly.fasta -outfmt "6 qseqid sseqid pident length qlen qstart qend sstart send sseq evalue bitscore"
+    ftsI_types_tsv: Path = None,  #  Path to table to convert ftsI snps to ftsI types
     output_file: Path = None,  # Path to output tsv
     sample_name: str = None,
 ) -> None:
     """ """
     hinfluenze_results = HinfluenzaeResults.from_tool_paths(
-        legionella_sbt_results_tsv=legionella_sbt_file,
-        lag1_blast_tsv=lag_1_blast_output,
+        ftsI_ariba_tsv=ftsI_ariba_tsv,
+        hicap_tsv=hicap_tsv,
+        biotype_blast_tsv=biotype_blast_tsv,
+        ftsI_types_tsv=ftsI_types_tsv,
         sample_name=sample_name,
     )
     hinfluenze_results.write_tsv(output_file=output_file)
 
 
 @call_parse
-def legionella_batch_parser(
+def Hinfluenzae_batch_parser(
     file_path_tsv: Path = None,  # Path to tsv containing file paths to the outputs from tools to be parsed. Must contain headers "sample_name", "sbt_results", and "lag1_blast_results"
     output_file: Path = None,  # Path to output tsv
 ) -> None:
