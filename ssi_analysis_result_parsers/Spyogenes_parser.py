@@ -131,7 +131,7 @@ def extract_emm_type(emm_blast_tsv: Path):
                     )
 
                 emm_typing_results["ENN_type"] = (
-                    "ENN" + blast_df_unique.iloc[1]["qseqid"][3:]
+                    "EMM" + blast_df_unique.iloc[1]["qseqid"][3:]
                 )
                 if (
                     blast_df_unique.iloc[1]["length"] < blast_df_unique.iloc[1]["qlen"]
@@ -148,7 +148,7 @@ def extract_emm_type(emm_blast_tsv: Path):
                     or emm_maintype in mrp_types_in_emm_plus_mrp_operons
                 ):
                     emm_typing_results["MRP_type"] = (
-                        "MRP" + emm_typing_results["EMM_type"][3:]
+                        "EMM" + emm_typing_results["EMM_type"][3:]
                     )
                     emm_typing_results["EMM_type"] = (
                         "EMM" + emm_typing_results["ENN_type"][3:]
@@ -158,7 +158,7 @@ def extract_emm_type(emm_blast_tsv: Path):
 
             elif blast_df_unique.shape[0] == 3:
                 emm_typing_results["MRP_type"] = (
-                    "MRP" + blast_df_unique.iloc[0]["qseqid"][3:]
+                    "EMM" + blast_df_unique.iloc[0]["qseqid"][3:]
                 )
                 if (
                     blast_df_unique.iloc[0]["length"] < blast_df_unique.iloc[0]["qlen"]
@@ -182,7 +182,7 @@ def extract_emm_type(emm_blast_tsv: Path):
                     )
 
                 emm_typing_results["ENN_type"] = (
-                    "ENN" + blast_df_unique.iloc[2]["qseqid"][3:]
+                    "EMM" + blast_df_unique.iloc[2]["qseqid"][3:]
                 )
                 if (
                     blast_df_unique.iloc[2]["length"] < blast_df_unique.iloc[2]["qlen"]
@@ -275,7 +275,7 @@ def Spyogenes_parser(
 ) -> None:
     """ """
     results = SpyogenesResults.from_tool_paths(
-        legionella_sbt_results_tsv=emm_blast_tsv, sample_name=sample_name
+        emm_blast_tsv=emm_blast_tsv, sample_name=sample_name
     )
     results.write_tsv(output_file=output_file)
 
