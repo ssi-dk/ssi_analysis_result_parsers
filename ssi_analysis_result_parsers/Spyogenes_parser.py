@@ -87,6 +87,7 @@ def extract_emm_type(emm_blast_tsv: Path):
         round((blast_df["sstart"] - blast_df["qstart"] + 1) / 100),
         round((blast_df["send"] - blast_df["qstart"] + 1) / 100),
     )
+    blast_df = blast_df.query("bitscore > 200")
     blast_df_unique = (
         blast_df.sort_values(by=["bitscore"], ascending=False)
         .groupby("extended_sstart")
